@@ -1,13 +1,18 @@
 from aiogram import Router, types
+from aiogram.types import CallbackQuery
 from services.db_service import get_user
 
 router = Router()
 
-@router.message(lambda message: message.text == "exit")
-async def exit_command(message: types.Message):
-    user_id = message.from_user.id
+
+@router.callback_query(lambda c: c.data == 'exit')
+async def exit_button_handler(callback_query: CallbackQuery):
+    user_id = callback_query.from_user.id
     user = get_user(user_id)
+
     if user:
-        await message.reply(f"До свидания, {user['username']}!")
+        await callback_query.message.answer(f"До свидания, {user[1]}!")
     else:
-        await message.reply("До свидания!")
+        await callback_query.message.answer("До свидания!")
+
+    await callback_query.answer()  # Закрывает окно уведомления о нажатии кнопки

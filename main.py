@@ -5,7 +5,8 @@ from handlers.start_handler import router as start_router
 from handlers.weather_handler import router as weather_router
 from handlers.guide_handler import router as guide_router
 from handlers.exit_handler import router as exit_router
-from services.db_service import create_db
+from services.db_service import create_db  # Импортируем функцию для создания БД
+
 # Инициализация бота
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -17,7 +18,10 @@ dp.include_router(guide_router)
 dp.include_router(exit_router)
 
 async def main():
-    create_db()  # Создаем БД при запуске бота
+    # Создаем базу данных и таблицу users перед запуском бота
+    create_db()
+
+    # Запускаем бота
     await dp.start_polling(bot)
 
 if __name__ == "__main__":

@@ -18,14 +18,13 @@ async def start_command(message: types.Message):
     else:
         greeting = f"С возвращением, {username}!"
 
-    # Создание inline-кнопок
-    keyboard = [
-        [InlineKeyboardButton("Погода", callback_data='weather')],
-        [InlineKeyboardButton("Гид по городу", callback_data='guide')],
-        [InlineKeyboardButton("Выход", callback_data='exit')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    # Создание inline-кнопок с правильными ключевыми аргументами
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Погода", callback_data='weather')],
+        [InlineKeyboardButton(text="Гид по городу", callback_data='guide')],
+        [InlineKeyboardButton(text="Выход", callback_data='exit')]
+    ])
 
     # Отправка приветственного сообщения и сообщения с выбором
     await message.answer(greeting)
-    await message.answer('Сделайте выбор: узнать погоду в городе или получить другую информацию о городе.', reply_markup=reply_markup)
+    await message.answer('Сделайте выбор: узнать погоду в городе или получить другую информацию о городе.', reply_markup=keyboard)
