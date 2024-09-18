@@ -1,5 +1,8 @@
-aiogram==3.13
-openai>=1.0.0
+aiogram==3.13.0
+
+openai==1.2.3
+#tiktoken==0.5.1
 python-dotenv==1.0.0
-aiohttp  # Убираем фиксированную версию
+aiohttp
 gtts==2.2.4
+#pydantic==1.10.8

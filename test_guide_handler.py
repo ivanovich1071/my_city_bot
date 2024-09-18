@@ -6,15 +6,19 @@ from handlers.guide_handler import guide_button_handler, get_guide_info
 
 class TestGuideHandler(unittest.IsolatedAsyncioTestCase):
 
-    @patch('services.openai_service.get_city_info', new_callable=AsyncMock)
+    @patch('handlers.guide_handler.get_city_info', new_callable=AsyncMock)
     async def test_guide_button_handler(self, mock_get_city_info):
         # Создаем объект CallbackQuery с полями
         callback_query = CallbackQuery(
             id="1",
             data="guide",
             from_user=User(id=123, is_bot=False, first_name="TestUser"),
+            chat_instance="some_chat_instance",
             message=Message(message_id=1, date="2023-09-01T12:00:00", chat=Chat(id=123, type="private"))
         )
+
+        # Мокаем ответный метод message.answer
+        callback_query.message.answer = AsyncMock()
 
         # Эмулируем нажатие на кнопку "Гид по городу"
         await guide_button_handler(callback_query)
@@ -22,7 +26,7 @@ class TestGuideHandler(unittest.IsolatedAsyncioTestCase):
         # Проверяем, что сообщение отправлено с запросом города
         callback_query.message.answer.assert_called_with("Введите название города для получения информации о городе:")
 
-    @patch('services.openai_service.get_city_info', new_callable=AsyncMock)
+    @patch('handlers.guide_handler.get_city_info', new_callable=AsyncMock)
     async def test_get_guide_info_with_city_and_query(self, mock_get_city_info):
         # Мокаем get_city_info
         mock_get_city_info.return_value = 'Тестовая информация о городе'
@@ -36,6 +40,9 @@ class TestGuideHandler(unittest.IsolatedAsyncioTestCase):
             date="2023-09-01T12:00:00"
         )
 
+        # Мокаем метод answer
+        message.answer = AsyncMock()
+
         await get_guide_info(message)
 
         # Проверяем, что get_city_info был вызван с правильными параметрами
@@ -44,7 +51,7 @@ class TestGuideHandler(unittest.IsolatedAsyncioTestCase):
         # Проверяем, что сообщение содержит ответ
         message.answer.assert_called_with("Тестовая информация о городе")
 
-    @patch('services.openai_service.get_city_info', new_callable=AsyncMock)
+    @patch('handlers.guide_handler.get_city_info', new_callable=AsyncMock)
     async def test_get_guide_info_with_only_city(self, mock_get_city_info):
         # Создаем объект Message с полями
         message = Message(
@@ -55,12 +62,15 @@ class TestGuideHandler(unittest.IsolatedAsyncioTestCase):
             date="2023-09-01T12:00:00"
         )
 
+        # Мокаем метод answer
+        message.answer = AsyncMock()
+
         await get_guide_info(message)
 
         # Проверяем, что сообщение содержит запрос уточнения
         message.answer.assert_called_with("Какую информацию Вы хотите узнать о городе Москва?")
 
-    @patch('services.openai_service.get_city_info', new_callable=AsyncMock)
+    @patch('handlers.guide_handler.get_city_info', new_callable=AsyncMock)
     async def test_get_guide_info_without_city(self, mock_get_city_info):
         # Создаем объект Message с полями
         message = Message(
@@ -71,6 +81,9 @@ class TestGuideHandler(unittest.IsolatedAsyncioTestCase):
             date="2023-09-01T12:00:00"
         )
 
+        # Мокаем метод answer
+        message.answer = AsyncMock()
+
         await get_guide_info(message)
 
         # Проверяем, что сообщение содержит запрос на ввод города
@@ -79,3 +92,4 @@ class TestGuideHandler(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
