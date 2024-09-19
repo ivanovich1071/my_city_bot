@@ -3,15 +3,17 @@ import logging
 import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import load_dotenv
 import openai
+import httpx  # добавляем httpx для обработки запросов
 
 # Загрузка ключей из файла .env
 load_dotenv()
+
 API_TOKEN = os.getenv('TOKEN')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
@@ -29,7 +31,7 @@ keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="Выход", callback_data='exit')]
 ])
 
-# Состояния
+# Состояния для FSM
 class Form(StatesGroup):
     city = State()
     question = State()
@@ -57,7 +59,7 @@ async def city_handler(message: types.Message, state: FSMContext):
     await bot.send_message(message.from_user.id, f"Вы выбрали город {city}. Задайте вопрос по этому городу:")
     await state.set_state(Form.question)
 
-# Функция для получения информации о городе
+# Функция для получения информации о городе с использованием OpenAI API
 async def get_city_info(city_name, user_query):
     system_prompt = (
         f"Ты - лучший гид по городу {city_name}. Ты знаешь всё о городе {city_name}. "
@@ -71,13 +73,28 @@ async def get_city_info(city_name, user_query):
         {"role": "user", "content": user_query}
     ]
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=messages
-    )
+    # Используем асинхронный запрос к OpenAI API через httpx для управления кодировкой
+    headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json; charset=utf-8"  # указываем кодировку явно
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "https://api.openai.com/v1/chat/completions",
+            json={
+                "model": "gpt-3.5-turbo",
+                "messages": messages
+            },
+            headers=headers
+        )
+
+    # Проверяем успешность запроса
+    response.raise_for_status()
+    response_data = response.json()
 
     # Возвращаем ответ от модели
-    return response['choices'][0]['message']['content']
+    return response_data['choices'][0]['message']['content']
 
 # Обработчик вопросов по городу
 @dp.message(Form.question)
@@ -90,6 +107,7 @@ async def question_handler(message: types.Message, state: FSMContext):
     await bot.send_message(message.from_user.id, "Вы можете задать еще один вопрос или выбрать другой город.", reply_markup=keyboard)
     await state.clear()
 
+# Основная функция для запуска бота
 async def main():
     await dp.start_polling(bot)
 
