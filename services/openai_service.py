@@ -19,7 +19,7 @@ async def get_city_info(city_name, user_query):
     ]
 
     response = await openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-3.5-turbo-1106",
         messages=messages
     )
 

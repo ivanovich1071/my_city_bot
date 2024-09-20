@@ -83,7 +83,7 @@ async def get_city_info(city_name, user_query):
         response = await client.post(
             "https://api.openai.com/v1/chat/completions",
             json={
-                "model": "gpt-3.5-turbo",
+                "model": "gpt-3.5-turbo-1106",
                 "messages": messages
             },
             headers=headers
