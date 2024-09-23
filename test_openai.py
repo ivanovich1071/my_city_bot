@@ -4,7 +4,7 @@ from services.openai_service import get_city_info
 
 class TestOpenAIService(unittest.IsolatedAsyncioTestCase):
 
-    @patch('services.openai_service.openai.ChatCompletion.create')
+    @patch('openai.ChatCompletion.create')  # Мокаем корректный метод API
     async def test_get_city_info(self, mock_openai_create):
         # Задаем mock-ответ от OpenAI API
         mock_openai_create.return_value = {
@@ -28,4 +28,3 @@ class TestOpenAIService(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

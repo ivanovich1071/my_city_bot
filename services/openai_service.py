@@ -18,8 +18,8 @@ async def get_city_info(city_name, user_query):
         {"role": "user", "content": user_query}
     ]
 
-    response = await openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-1106",
+    response = await openai.ChatCompletion.create(  # Используем корректный атрибут ChatCompletion
+        model="gpt-3.5-turbo",
         messages=messages
     )
 

@@ -1,6 +1,7 @@
 import openai
 import requests
-import nest_asynciorim
+import asyncio
+import nest_asyncio
 import os
 from getpass import getpass
 import json
